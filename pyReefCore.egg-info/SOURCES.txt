@@ -1,0 +1,8 @@
+README.md
+pyReefCore/__init__.py
+pyReefCore/model.py
+pyReefCore/remote.py
+pyReefCore.egg-info/PKG-INFO
+pyReefCore.egg-info/SOURCES.txt
+pyReefCore.egg-info/dependency_links.txt
+pyReefCore.egg-info/top_level.txt
