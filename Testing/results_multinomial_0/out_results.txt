@@ -1,5 +1,0 @@
-Mean diff: 44.3708609272
-Standard deviation: 3.97350993377
-Mode: [46.35761589]
-Accept ratio: 60.0 %
-Samples accepted : 3 out of 5
