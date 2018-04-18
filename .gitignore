@@ -23,4 +23,8 @@ doc/_build/
 tags
 doc/env/
 
-*/results_* 
+SyntheticProblem/results_* 
+
+HenonIsland/results_* 
+
+OneTreeReef/results_* 

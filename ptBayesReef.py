@@ -1,8 +1,12 @@
 
 
-#Main Contributers:   Rohitash Chandra and Ratneel Deo  Email: c.rohitash@gmail.com, deo.ratneel@gmail.com
+#Main Contributers:   Rohitash Chandra and Jodie Pall  Email: c.rohitash@gmail.com 
 
-# Bayeslands II: Parallel tempering for multi-core systems - Badlands
+#rohitash-chandra.github.io
+
+#  : Parallel tempering for multi-core systems - PT-BayesReef
+
+#related: https://github.com/pyReef-model/pt-BayesReef
 
 
 from __future__ import print_function, division
@@ -989,7 +993,7 @@ def main():
 
 	random.seed(time.time()) 
 
-	samples = 40 # total number of samples by all the chains (replicas) in parallel tempering
+	samples = 4000 # total number of samples by all the chains (replicas) in parallel tempering
 
 	run_nb = 0
 
@@ -1106,7 +1110,7 @@ def main():
 	# PT is a multicore implementation must num_chains >= 2
 	# Choose a value less than the numbe of core available (avoid context swtiching)
 	#-------------------------------------------------------------------------------------
-	num_chains = 2  # number of Replica's that will run on separate cores. Note that cores will be shared automatically - if enough cores not available
+	num_chains = 6 # number of Replica's that will run on separate cores. Note that cores will be shared automatically - if enough cores not available
 	swap_ratio = 0.1    #adapt these 
 	burn_in =0.1  
 
@@ -1161,7 +1165,7 @@ def main():
  
 	
 	print ('time taken  in minutes = ', (timer_end-timer_start)/60)
-	np.savetxt(fname+'/time_sqerror.txt',[ (timer_end-timer_start)/60,  rmse_sed, rmse], fmt='%1.2f'  )
+	np.savetxt(fname+'/time_sqerror.txt',[ (timer_end-timer_start)/60], fmt='%1.2f'  )
 
 	mpl_fig = plt.figure()
 	ax = mpl_fig.add_subplot(111)
