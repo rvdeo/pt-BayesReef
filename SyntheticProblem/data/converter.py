@@ -7,42 +7,47 @@ import matplotlib.pyplot as plt
 import matplotlib.mlab as mlab
 
 
+def noGrowthColumn(intervals, prop_mat):
+	"""create function that puts a 1 in a 1d array (x) when the growth is zero"""
+	v_nogrowth = np.zeros((intervals.size,1))
 
+	for a in range(intervals.size):
+		if np.amax(prop_mat[a,:]) == 0.:
+			v_nogrowth[a,:] = 1.
+	prop_mat = np.append(prop_mat,v_nogrowth,axis=1)
+	return prop_mat
 
 def main():
+	datafile = 'synthetic_core/rawsynth-10.txt'
+	intervals, a1,a2,a3,cs = np.genfromtxt(datafile, usecols=(0,1,2,3,4), unpack=True)
+	prop_mat = np.loadtxt(datafile, usecols=(1,2,3,4))
+	prop_mat = noGrowthColumn(intervals, prop_mat)
+	idx=0
+	no_growth_val = 0.
+	# write multinomial matrix
+	with file('synthdata_t_prop_08_x.txt', 'wb') as prop_file:
+		with file('synthdata_t_vec_08_x.txt', 'wb') as vec_file:
+			for x in range(intervals.size):
+				vector = np.zeros(prop_mat.shape[1])
+				slc=[]
+				rev = -1-x
+				prop_file.write(('{0}\t'.format(intervals[rev])))
+				slc = np.append(slc, prop_mat[x,:])
+				# slc = np.append(slc, (a1[x],a2[x],a3[x],cs[x]))
+				if not all(v == 0 for v in slc):
+					facies_idx = np.argmax(slc) #finds the dominant assemblage in a slice
+					vector[facies_idx] = 1.
+					for y in range(prop_mat.shape[1]):
+						prop_file.write('{0}\t'.format(vector[y]))
+					vec_file.write('{0}\t{1}\n'.format(intervals[rev],facies_idx+1))
+					prop_file.write('\n')
 
-	data = np.loadtxt("synth_core.txt")
-	core_depths = data[:,0]
-	print 'core_depths', core_depths
-	print 'core_depths.size',core_depths.size
-	core_data = data[:,1]
-	print 'core_data',core_data
-	pred_core = np.zeros((core_depths.size,4))
-
-	for n in range(0,core_depths.size):
-			if core_data[n] == 0.571:
-				pred_core[n,3] = 1 
-			if core_data[n] == 0.429:
-				pred_core[n,2] = 1 
-			if core_data[n] == 0.286:
-				pred_core[n,1] = 1 
-			if core_data[n] == 0.143:
-				pred_core[n,0] = 1 
-
-	print pred_core
-
-	pred_core_ = str(pred_core)
-
-	with file('synth_core_bi.txt','w') as outfile:
-		outfile.write ('')
-
-
-	with file('synth_core_bi.txt','a') as outfile:
-		for x in range(0,core_depths.size):
-			for y in range(0,4):
-				val = str(int(pred_core[x,y]))
-				outfile.write(val)
-				outfile.write(' ')
-			outfile.write('\n')
+				else:
+					for y in range(prop_mat.shape[1]):
+						vector=np.full(prop_mat.shape[1],no_growth_val)
+						prop_file.write('{0}\t'.format(vector[y]))
+					vec_file.write('{0}\t{1}\n'.format(intervals[rev],no_growth_val))
+					prop_file.write('\n')
+	print 'Finished conversion.'
 
 if __name__ == "__main__": main()

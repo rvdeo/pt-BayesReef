@@ -272,8 +272,8 @@ class Model(object):
 
         return 1
 
-    def convert_vector(self, communities, input_vector, sedsim, flowsim, verbose=False):
-        # print 'input vector: ', input_vector
+    def convertVector(self, communities, input_vector, sedsim, flowsim, verbose=False):
+        # print 'Input vector: ', input_vector
         new_shape = communities*4
         if (sedsim == True) and (flowsim == False):
             self.opt_Sed = input_vector[0:new_shape].reshape(4,communities)
@@ -325,8 +325,8 @@ class Model(object):
         optMP = self.opt_malthusParam
 
         print 'New parameters:'
-        # print '\t Sed:\n', opts
-        # print '\t Flow:\n', optf
+        print '\t Sed:\n', opts
+        print '\t Flow:\n', optf
         print '\t Matrix main:', x, 'and sub-/super:', y
         print '\t Malthus.:', tempParam
         
