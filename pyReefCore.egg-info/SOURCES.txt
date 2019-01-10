@@ -3,7 +3,6 @@ pyReefCore/__init__.py
 pyReefCore/model.py
 pyReefCore/plotResults.py
 pyReefCore/remote.py
-pyReefCore/saveParameters.py
 pyReefCore.egg-info/PKG-INFO
 pyReefCore.egg-info/SOURCES.txt
 pyReefCore.egg-info/dependency_links.txt

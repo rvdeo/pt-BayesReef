@@ -18,6 +18,7 @@ import csv
 import numpy as np
 from numpy import inf
 import matplotlib as mpl
+mpl.use('Agg')
 import matplotlib.pyplot as plt
 import matplotlib.mlab as mlab
 from matplotlib.cm import terrain, plasma, Set2
@@ -473,7 +474,7 @@ class ptReplica(multiprocessing.Process):
 				pos_samples_d[b+1,:] = pos_samples_t[i,:] 
 
 			b = b + 1
-
+			
  			# if (b % batch_factor == 0) and (b != 0):
  			if (b+1) % (batch_factor+1) == 0 and b != 0:
  				print('Resetting Batch counter')
@@ -499,7 +500,7 @@ class ptReplica(multiprocessing.Process):
 
 				out_d = open(self.filename+'/posterior/predicted_core/pos_samples_d/chain_'+ str(self.temperature)+ '.txt','a+')
 				np.savetxt(out_d, pos_samples_d[:b+1,:], fmt='%1.2f', newline='\n')
-
+			
 
 			if ( i % self.swap_interval == 0 ): 
 
@@ -795,15 +796,39 @@ class ParallelTempering:
 
 		burnin = int(self.NumSamples * self.burn_in)
 		print('Burnin:',burnin)
-		pos_param = np.zeros((self.num_chains, self.NumSamples - burnin, self.num_param))
+
+		
+		file_name = self.folder + '/posterior/pos_parameters/'+filename + str(self.temperature[0]) + '.txt'
+		dat_dummy = np.loadtxt(file_name) 
+
+		pos_param = np.zeros((self.num_chains, dat_dummy.shape[0]-burnin, self.num_param))
+		print('Pos_param.shape:', pos_param.shape)
+		pred_t = np.zeros((self.num_chains, dat_dummy.shape[0]-burnin, self.gt_vec_t.shape[0]))
+		pred_d = np.zeros((self.num_chains, dat_dummy.shape[0]-burnin, self.gt_vec_d.shape[0]))
+
+		print('pred_t:',pred_t,'pred_t.shape:', pred_t.shape)
+		print('gt_prop_t.shape:',self.gt_prop_t.shape)
+
+		file_name = self.folder + '/posterior/pos_likelihood/'+filename + str(self.temperature[0]) + '.txt'
+		dat = np.loadtxt(file_name) 
+		likelihood_rep = np.zeros((self.num_chains, dat.shape[0]-burnin, 2 )) # index 1 for likelihood posterior and index 0 for Likelihood proposals. Note all likilihood proposals plotted only
+		
+		'''
+
+
+		pos_param = np.zeros((self.num_chains, self.NumSamples - burnin , self.num_param))
 		print('Pos_param.shape:', pos_param.shape)
 		pred_t = np.zeros((self.num_chains, self.NumSamples - burnin, self.gt_vec_t.shape[0]))
 		pred_d = np.zeros((self.num_chains, self.NumSamples - burnin, self.gt_vec_d.shape[0]))
 
 		print('pred_t:',pred_t,'pred_t.shape:', pred_t.shape)
 		print('gt_prop_t.shape:',self.gt_prop_t.shape)
+
+		
  
 		likelihood_rep = np.zeros((self.num_chains, self.NumSamples - burnin, 2 )) # index 1 for likelihood posterior and index 0 for Likelihood proposals. Note all likilihood proposals plotted only
+		'''
+
 		accept_percent = np.zeros((self.num_chains, 1))
 
 		accept_list = np.zeros((self.num_chains, self.NumSamples )) 
