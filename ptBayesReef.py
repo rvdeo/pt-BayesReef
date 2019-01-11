@@ -786,9 +786,9 @@ class ParallelTempering:
 		plotResults.boxPlots(self.communities, pos_param, True, True, 9, 1, self.folder)
 
 		sample_range = np.arange(burnin+1,self.NumSamples+1, 1)
-		for s in range(self.num_param):  
+		'''for s in range(self.num_param):  
 			self.plot_figure(pos_param[s,:], 'pos_distri_'+str(s), self.realvalues[s], sample_range) 
-
+		'''
 		return (pos_param,likelihood_rep, accept_list,  list_predcore_t, list_predcore_d)
 
 	# Merge different MCMC chains y stacking them on top of each other
@@ -980,16 +980,23 @@ class ParallelTempering:
 		print("------------------------------------------------------------")
 		print("------------------------------------------------------------")
 		print("------------------------------------------------------------")
-		print( list)
+		print( sample_range)
 		print("------------------------------------------------------------")
 		print("------------------------------------------------------------")
 		print("------------------------------------------------------------")
 		print("------------------------------------------------------------")
-		print (list_points)
+		print (list_points.T)
 		print("------------------------------------------------------------")
 		print("------------------------------------------------------------")
 		print("------------------------------------------------------------")
+
+		print('sample_range shape', sample_range.shape)
+
+		print('list_points.T shape', list_points.T.shape)
  
+		print("------------------------------------------------------------")
+		print("------------------------------------------------------------")
+
 
 		ax2.set_facecolor('#f2f2f3') 
 		ax2.plot(sample_range, list_points.T , label=None)
@@ -1105,7 +1112,7 @@ def main():
 	# PT is a multicore implementation must num_chains >= 2
 	# Choose a value less than the numbe of core available (avoid context swtiching)
 	#-------------------------------------------------------------------------------------
-	samples = 60 # total number of samples by all the chains (replicas) in parallel tempering
+	samples = 100000  # total number of samples by all the chains (replicas) in parallel tempering
 	num_chains = 6 # number of Replica's that will run on separate cores. Note that cores will be shared automatically - if enough cores not available
 	swap_ratio = 0.1    #adapt these 
 	burn_in = 0.1  
