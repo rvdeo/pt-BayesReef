@@ -28,6 +28,8 @@ from pyReefCore import plotResults
 from cycler import cycler
 from scipy import stats 
 
+from sys import getsizeof
+
 cmap=plt.cm.Set2
 c = cycler('color', cmap(np.linspace(0,1,8)) )
 plt.rcParams["axes.prop_cycle"] = c
@@ -370,8 +372,9 @@ class ptReplica(multiprocessing.Process):
 			# reorder each row , then transpose back as sed1, etc.
 			tmp = np.empty((communities,4))
 			for x in range(t2matrix.shape[0]):
-				a = np.sort(t2matrix[x,:])
-				tmp[x,:] = a
+				tmp[x,:]  = np.sort(t2matrix[x,:])
+				
+
 			tmat = tmp.T
 			p_sed1 = tmat[0,:]
 			p_sed2 = tmat[1,:]
@@ -385,11 +388,13 @@ class ptReplica(multiprocessing.Process):
 				for s in range(tmat.shape[0]):
 					t2matrix[x,s] = self.proposalJump(tmatrix[x,s], self.minlimits_vec[v_id], self.maxlimits_vec[v_id], stepsize_vec[v_id])
 					v_id = v_id + 1
+			
 			# reorder each row , then transpose back as flow1, etc.
 			tmp = np.empty((communities,4))
 			for x in range(t2matrix.shape[0]):
-				a = np.sort(t2matrix[x,:])
-				tmp[x,:] = a
+				tmp[x,:] = np.sort(t2matrix[x,:])
+				 
+
 			tmat = tmp.T
 			p_flow1 = tmat[0,:]
 			p_flow2 = tmat[1,:]
@@ -414,6 +419,11 @@ class ptReplica(multiprocessing.Process):
 			# print('Sample:', i, ',v_proposal:', v_proposal)
 			# Passing paramters to calculate likelihood and diff score
 			[likelihood_proposal, diff, sim_pred_t, sim_pred_d, sim_vec_t, sim_vec_d] = self.likelihoodWithDependence(reef, v_proposal, S_star, cps_star, ca_props_star)
+
+			del diff 
+			del sim_pred_d
+			del sim_pred_t
+
 
 			# Difference in likelihood from previous accepted proposal
 			diff_likelihood = likelihood_proposal - likelihood
@@ -489,6 +499,10 @@ class ptReplica(multiprocessing.Process):
 				np.savetxt(out_d, pos_samples_d[:batch_factor+1,:], fmt='%1.2f', newline='\n')
 
 				b = -1
+
+				outparam.close()
+				out_t.close()
+				out_d.close()
 			
 			elif (i == samples-2):	
 				print('pos_param', pos_param, pos_param.shape)	
@@ -500,9 +514,63 @@ class ptReplica(multiprocessing.Process):
 
 				out_d = open(self.filename+'/posterior/predicted_core/pos_samples_d/chain_'+ str(self.temperature)+ '.txt','a+')
 				np.savetxt(out_d, pos_samples_d[:b+1,:], fmt='%1.2f', newline='\n')
+				
+				outparam.close()
+				out_t.close()
+				out_d.close()
+				
+				'''
+				del outparam 
+				del out_t 
+				del out_d 
+				'''
+
+
+			#----------------------------------------------------------------------------------------
+			# delete all varaibled and clear memory
+			#----------------------------------------------------------------------------------------
+
+			
+			del idx_sed 
+			del tmat 
+			del tmatrix 
+			del t2matrix 
+			del v_id
+			del tmp 
+				
+			
+			del p_sed1 
+			del p_sed2 
+			del p_sed3 
+			del p_sed4 
+			del p_flow1 
+			del p_flow2 
+			del p_flow3 
+			del p_flow4 
+			del  p_ax 
+			del p_ay  
+			del p_m 
+			del v_proposal
+			del all_flow_pr 
+			del p_pr_flow 
+			del all_sed_pr
+			del p_pr_sed 
+			del log_pr_flow_p 
+			del log_pr_sed_p 
+			del log_pr_flow_c
+			del log_pr_sed_c 
+			del log_pr_p 
+			del log_pr_c 
+			del log_pr_diff
+			del u 
+			del mh_prob
+			
+			
 			
 
+			#----------------------------------------------------------------------------------------
 			if ( i % self.swap_interval == 0 ): 
+			#if ( i % 2 == 0 ): 
 
 				if i> burnsamples and self.runninghisto == True:
 					hist, bin_edges = np.histogram(pos_param[burnsamples:i,0], density=True)
@@ -522,14 +590,29 @@ class ptReplica(multiprocessing.Process):
 					plt.savefig(file_name + '_1.png')
 					plt.close()
 
+					del hist
+					del bin_edges
+
  
 				others = np.asarray([likelihood])
 				param = np.concatenate([v_current,others])     
-			 
+
+
 				# paramater placed in queue for swapping between chains
 				self.parameter_queue.put(param)
+
+				del param
+				del others
 				
 				
+				print('-----------------------------------------------')
+				print('-----------------------------------------------')
+				print (getsizeof(likelihood))
+				print('-----------------------------------------------')
+				print('-----------------------------------------------')
+
+	
+
 				#signal main process to start and start waiting for signal for main
 				self.signal_main.set()              
 				self.event.wait()
@@ -544,11 +627,16 @@ class ptReplica(multiprocessing.Process):
 						v_current= result[0:v_current.size]     
 						likelihood = result[v_current.size]
 
+						del result
+
 					except:
 						print ('error')	 
+
+					
+
+
 		accepted_count =  len(count_list) 
 		accept_ratio = accepted_count / (samples * 1.0) * 100
-
 
 
 		#--------------------------------------------------------------- 
@@ -567,18 +655,21 @@ class ptReplica(multiprocessing.Process):
 		file_name = self.filename + '/posterior/accept_list/chain_' + str(self.temperature) + '.txt'
 		np.savetxt(file_name, accept_list, fmt='%1.2f')
  
-		# file_name = self.filename+'/posterior/pos_parameters/chain_'+ str(self.temperature)+ '.txt'
-		# np.savetxt(file_name,pos_param ) 
+		file_name = self.filename+'/posterior/pos_parameters/chain_'+ str(self.temperature)+ '.txt'
+		np.savetxt(file_name,pos_param ) 
 
-		# file_name = self.filename+'/posterior/predicted_core/pos_samples_t/chain_'+ str(self.temperature)+ '.txt'
-		# np.savetxt(file_name, pos_samples_t, fmt='%1.2f')
+		file_name = self.filename+'/posterior/predicted_core/pos_samples_t/chain_'+ str(self.temperature)+ '.txt'
+		np.savetxt(file_name, pos_samples_t, fmt='%1.2f')
 
-		# file_name = self.filename+'/posterior/predicted_core/pos_samples_d/chain_'+ str(self.temperature)+ '.txt'
-		# np.savetxt(file_name, pos_samples_d, fmt='%1.2f')
+		file_name = self.filename+'/posterior/predicted_core/pos_samples_d/chain_'+ str(self.temperature)+ '.txt'
+		np.savetxt(file_name, pos_samples_d, fmt='%1.2f')
  
- 
+ 		del param
+		del others
  
 		self.signal_main.set()
+
+		return
 
 
 class ParallelTempering:
@@ -689,6 +780,8 @@ class ParallelTempering:
 					result =  self.chain_parameters[j].get()
 					replica_param[j,:] = result[0:self.num_param]   
 					lhood[j] = result[self.num_param]
+
+					del result
  
  
 
@@ -719,6 +812,10 @@ class ParallelTempering:
 					param = np.concatenate([replica_param[l,:],others])
  
 					self.chain_parameters[l-1].put(param)
+
+					del para
+					del others
+					del param
 					
 				else:
 
@@ -726,7 +823,6 @@ class ParallelTempering:
 					others = np.asarray([  lhood[l-1] ])
 					para = np.concatenate([replica_param[l-1,:],others]) 
  
-				   
 					self.chain_parameters[l-1].put(para) 
 
 					others = np.asarray([  lhood[l]  ])
@@ -734,12 +830,21 @@ class ParallelTempering:
  
 					self.chain_parameters[l].put(param)
 
+					del para
+					del others
+					del param
+
+				del u
+				del swap_prob
+
+
 
 			#-------------------------------------------------------------------------------------
 			# resume suspended process
 			#-------------------------------------------------------------------------------------
 			for k in range (self.num_chains):
 					self.event[k].set()
+
 								
 
 			#-------------------------------------------------------------------------------------
@@ -751,10 +856,13 @@ class ParallelTempering:
 					count+=1
 					while self.chain_parameters[i].empty() is False:
 						dummy = self.chain_parameters[i].get()
+						del dummy
 
 			if count == self.num_chains :
 				flag_running = False
 			
+			del count
+
 
 		#-------------------------------------------------------------------------------------
 		#wait for all processes to jin the main process
@@ -1117,6 +1225,10 @@ def main():
 	swap_ratio = 0.1    #adapt these 
 	burn_in = 0.1  
 
+
+	
+
+
 	#parameters for Parallel Tempering
 	maxtemp = 5 #int(num_chains * 5)/2
 	
@@ -1221,6 +1333,7 @@ def main():
 	plt.savefig( fname+'/likelihood.png')
 	plt.clf()
 
+	'''
 	adj_acceptlist = accept_list +1
 	plt.plot(sample_range, adj_acceptlist.T)
 	plt.title('Acceptance through time', size=font)
@@ -1230,7 +1343,7 @@ def main():
 	plt.savefig( fname+'/accept_list.png')
  	plt.close()
  
-	
+	'''
 	print ('Time taken  in minutes = ', (timer_end-timer_start)/60)
 	np.savetxt(fname+'/time_sqerror.txt',[ (timer_end-timer_start)/60], fmt='%1.2f'  )
 
