@@ -9,6 +9,7 @@
 
 from __future__ import print_function, division
 import multiprocessing
+import gc
 
 import os
 import math
@@ -863,6 +864,9 @@ class ParallelTempering:
 			
 			del count
 
+			
+			gc.collect() # fLet the main threag constantly be removing files from memory
+
 
 		#-------------------------------------------------------------------------------------
 		#wait for all processes to jin the main process
@@ -1220,7 +1224,7 @@ def main():
 	# PT is a multicore implementation must num_chains >= 2
 	# Choose a value less than the numbe of core available (avoid context swtiching)
 	#-------------------------------------------------------------------------------------
-	samples = 100000  # total number of samples by all the chains (replicas) in parallel tempering
+	samples = 1000000  # total number of samples by all the chains (replicas) in parallel tempering
 	num_chains = 6 # number of Replica's that will run on separate cores. Note that cores will be shared automatically - if enough cores not available
 	swap_ratio = 0.1    #adapt these 
 	burn_in = 0.1  
